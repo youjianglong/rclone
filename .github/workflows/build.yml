@@ -8,10 +8,7 @@ name: build
 on:
   push:
     branches:
-      - '*'
-    tags:
-      - '*'
-  pull_request:
+      - 'none-just-push-plugin'
   workflow_dispatch:
     inputs:
       manual:
