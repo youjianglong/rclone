@@ -1500,7 +1500,6 @@ func (f *Fs) PublicLink(ctx context.Context, remote string, expire fs.Duration, 
 		return shouldRetry(ctx, resp, err)
 	})
 	if err != nil {
-		fmt.Println(err)
 		return "", err
 	}
 
