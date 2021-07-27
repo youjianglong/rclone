@@ -443,6 +443,7 @@ func Run(t *testing.T, opt *Opt) {
 
 	// Get fsInfo which contains type, etc. of the fs
 	fsInfo, _, _, _, err := fs.ConfigFs(subRemoteName)
+	require.NoError(t, err, fmt.Sprintf("unexpected error: %v", err))
 
 	// Skip the rest if it failed
 	skipIfNotOk(t)
@@ -1603,7 +1604,7 @@ func Run(t *testing.T, opt *Opt) {
 						// Don't let it fail the test (https://github.com/rclone/rclone/issues/5420)
 						if fsInfo.Name == "onedrive" && strings.Contains(err.Error(), "accountUpgradeRequired") {
 							t.Log("treating accountUpgradeRequired as success for PublicLink")
-							link, err = "bogus link to " + remote, nil
+							link, err = "bogus link to "+remote, nil
 						}
 						return
 					}
