@@ -23,8 +23,10 @@ import (
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/accounting"
 	"github.com/rclone/rclone/fs/cache"
+	"github.com/rclone/rclone/fs/config"
 	"github.com/rclone/rclone/fs/config/configfile"
 	"github.com/rclone/rclone/fs/config/configflags"
+	"github.com/rclone/rclone/fs/config/confighttp"
 	"github.com/rclone/rclone/fs/config/flags"
 	"github.com/rclone/rclone/fs/filter"
 	"github.com/rclone/rclone/fs/fserrors"
@@ -399,7 +401,11 @@ func initConfig() {
 	configflags.SetFlags(ci)
 
 	// Load the config
-	configfile.Install()
+	if config.IsHttp() {
+		confighttp.Install()
+	} else {
+		configfile.Install()
+	}
 
 	// Start accounting
 	accounting.Start(ctx)

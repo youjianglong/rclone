@@ -13,6 +13,7 @@ import (
 	"github.com/rclone/rclone/cmd"
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
+	"github.com/rclone/rclone/fs/config/confighttp"
 	"github.com/rclone/rclone/fs/config/flags"
 	"github.com/rclone/rclone/fs/rc"
 	"github.com/spf13/cobra"
@@ -528,6 +529,7 @@ func init() {
 	configEncryptionCommand.AddCommand(configEncryptionSetCommand)
 	configEncryptionCommand.AddCommand(configEncryptionRemoveCommand)
 	configEncryptionCommand.AddCommand(configEncryptionCheckCommand)
+	configEncryptionCommand.AddCommand(configEncryptionHttpCommand)
 }
 
 var configEncryptionCommand = &cobra.Command{
@@ -607,6 +609,37 @@ If the config file is not encrypted it will return a non zero exit code.
 		config.LoadedData()
 		if !config.IsEncrypted() {
 			return errors.New("config file is NOT encrypted")
+		}
+		return nil
+	},
+}
+
+var configEncryptionHttpCommand = &cobra.Command{
+	Use:   "http <iv> <output file>",
+	Short: `Encrypt the file and use it for loading over HTTP`,
+	Long:  `This command encrypts the config file and uses it for loading over HTTP`,
+	RunE: func(command *cobra.Command, args []string) error {
+		cmd.CheckArgs(2, 2, command, args)
+		iv := strings.TrimSpace(args[0])
+		if iv == "" {
+			return errors.New("iv is required")
+		}
+		outFile := strings.TrimSpace(args[1])
+		if outFile == "" {
+			return errors.New("output file is required")
+		}
+		store := config.LoadedData()
+		content, err := store.Serialize()
+		if err != nil {
+			return err
+		}
+		data, err := confighttp.SymmetricEncrypt([]byte(content), confighttp.EncryptKey, []byte(iv))
+		if err != nil {
+			return err
+		}
+		err = os.WriteFile(outFile, data, 0644)
+		if err != nil {
+			return err
 		}
 		return nil
 	},

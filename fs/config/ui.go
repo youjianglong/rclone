@@ -344,13 +344,13 @@ func printRemoteOptions(name string, prefix string, sep string, redacted bool) {
 
 // listRemoteOptions lists the options of the remote
 func listRemoteOptions(name string) {
-	printRemoteOptions(name, "- ", ": ", false)
+	printRemoteOptions(name, "- ", ": ", IsHttp())
 }
 
 // ShowRemote shows the contents of the remote in config file format
 func ShowRemote(name string) {
 	fmt.Printf("[%s]\n", name)
-	printRemoteOptions(name, "", " = ", false)
+	printRemoteOptions(name, "", " = ", IsHttp())
 }
 
 // ShowRedactedRemote shows the contents of the remote in config file format

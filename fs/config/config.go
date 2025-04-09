@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	mathrand "math/rand"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -320,6 +321,33 @@ func GetConfigPath() string {
 	return configPath
 }
 
+// isHttpConfig checks if the config file path is a remote config file path
+func isHttpConfig(path string) bool {
+	return strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://")
+}
+
+func IsHttp() bool {
+	return isHttpConfig(configPath)
+}
+
+func GetConfigFilename() string {
+	if configPath == "" {
+		return ""
+	}
+	if !IsHttp() {
+		return filepath.Base(configPath)
+	}
+	u, err := url.Parse(configPath)
+	if err != nil {
+		fs.Errorf(nil, "Failed to parse config url: %v", err)
+		return ""
+	}
+	if u.Path == "" || u.Path == "/" {
+		return configFileName
+	}
+	return filepath.Base(u.Path)
+}
+
 // SetConfigPath sets new config file path
 //
 // Checks for empty string, os null device, or special path, all of which indicates in-memory config.
@@ -327,6 +355,8 @@ func SetConfigPath(path string) (err error) {
 	var cfgPath string
 	if path == "" || path == os.DevNull {
 		cfgPath = ""
+	} else if isHttpConfig(path) {
+		cfgPath = path
 	} else if filepath.Base(path) == noConfigFile {
 		cfgPath = ""
 	} else if err = file.IsReserved(path); err != nil {
